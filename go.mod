@@ -1,4 +1,4 @@
-module github.com/caddy-dns/scaleway
+module github.com/simonvandermeer/caddy-dns-providers-scaleway
 
 go 1.24
 
