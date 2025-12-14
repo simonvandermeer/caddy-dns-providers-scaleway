@@ -3,7 +3,7 @@ package scaleway
 import (
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
-	"github.com/libdns/scaleway"
+	"github.com/simonvandermeer/libdns-scaleway"
 )
 
 // Provider lets Caddy read and manipulate DNS records hosted by this DNS provider.
