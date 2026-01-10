@@ -3,7 +3,7 @@ package scaleway
 import (
 	"github.com/caddyserver/caddy/v2"
 	"github.com/caddyserver/caddy/v2/caddyconfig/caddyfile"
-	"github.com/simonvandermeer/libdns-scaleway"
+	scaleway "github.com/simonvandermeer/libdns-scaleway"
 )
 
 // Provider lets Caddy read and manipulate DNS records hosted by this DNS provider.
@@ -23,6 +23,7 @@ func (Provider) CaddyModule() caddy.ModuleInfo {
 
 // Provision sets up the module. Implements caddy.Provisioner.
 func (p *Provider) Provision(ctx caddy.Context) error {
+	p.Provider.AccessKey = caddy.NewReplacer().ReplaceAll(p.Provider.AccessKey, "")
 	p.Provider.SecretKey = caddy.NewReplacer().ReplaceAll(p.Provider.SecretKey, "")
 	p.Provider.OrganizationID = caddy.NewReplacer().ReplaceAll(p.Provider.OrganizationID, "")
 	return nil
@@ -31,6 +32,7 @@ func (p *Provider) Provision(ctx caddy.Context) error {
 // UnmarshalCaddyfile sets up the DNS provider from Caddyfile tokens. Syntax:
 //
 //	scaleway {
+//	    access_key string
 //	    secret_key string
 //	    organization_id string
 //	}
@@ -43,6 +45,16 @@ func (p *Provider) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 		}
 		for nesting := d.Nesting(); d.NextBlock(nesting); {
 			switch d.Val() {
+			case "access_key":
+				if p.Provider.AccessKey != "" {
+					return d.Err("Access key already set")
+				}
+				if d.NextArg() {
+					p.Provider.AccessKey = d.Val()
+				}
+				if d.NextArg() {
+					return d.ArgErr()
+				}
 			case "secret_key":
 				if p.Provider.SecretKey != "" {
 					return d.Err("Secret key already set")
@@ -67,6 +79,9 @@ func (p *Provider) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 				return d.Errf("unrecognized subdirective '%s'", d.Val())
 			}
 		}
+	}
+	if p.Provider.AccessKey == "" {
+		return d.Err("missing Access key")
 	}
 	if p.Provider.SecretKey == "" {
 		return d.Err("missing Secret key")
